@@ -1,4 +1,8 @@
 const PUYO_SIZE = 10;
+const FIELD_HEIGHT = 13;
+const FIELD_WIDTH = 6;
+const NEXT_COUNT = 2;
+
 var context = document.querySelector("canvas").getContext("2d"); 
 
 const TYPE = {
@@ -11,45 +15,24 @@ const TYPE = {
   WALL:   6
 }
 
+const STATE = {
+  UNDER: 0,
+  ABOVE: 1,
+  LEFT: 2,
+  RIGHT: 3
+}
+
 class Puyo {
-  constructor(par = 0, child = 0, positionX, positionY) {
-    this.axis = {
-      color: par,
-      posX: positionX,
-      posY: positionY
-    }
-
-    this.sub = {
-      color: child,
-      posX: positionX,
-      poY:  positionY + 1
-    }
-  }
-
-  isLeft() {
-    if (this.axis.posY === this.sub.posY && this.axis.posX > this.sub.posX) return true;
-    return false;
-  }
-
-  isRight() {
-    if (this.axis.posY === this.sub.posY && this.axis.posX < this.sub.posX) return true;
-    return false;
-  }
-
-  isUnder() {
-    if (this.axis.posX === this.sub.posX && this.axis.posY > this.sub.posY) return true;
-    return false;
-  }
-
-  isAbove() {
-    if (this.axis.posX === this.sub.posX && this.axis.posY < this.sub.posY) return true; return false;
+  constructor(axis = 0, sub = 0) {
+    this.axis = axis;
+    this.sub = sub;
   }
 }
 
 class Field {
   constructor(width, height, nextCount, puyoClass) {
-    this.height = width;
-    this.width = height;
+    this.height = height 
+    this.width = width;
     this.nextCount = nextCount;
     this.puyoClass = puyoClass;
   
@@ -58,15 +41,15 @@ class Field {
       this.field[y] = new Array(this.width).fill(0);
     }
 
-    this.puyo = new puyoClass();
-    this.nextPuyo = new Array(this.nextCount);
-
     this.setPosition();
+
+    this.puyo = new puyoClass(TYPE.RED, TYPE.RED, this.positionX, this.positionY);
+
   }
 
   setPosition() {
-    this.positionX = Math.floor(this.width / 2); 
-    this.positionY = 1; 
+    this.positionX = Math.floor(this.width / 2) - 1; 
+    this.positionY = 0; 
   }
 
   getPuyo(x, y) {
@@ -81,8 +64,16 @@ class View {
     this.width = width;
     this.nextCount = nextCount;
     this.puyoClass = puyoClass;
+  }
 
-   // this.initView();
+  drawPuyo(field) {
+    let axisPosX = field.positionX * PUYO_SIZE;
+    let axisPosY = field.positionY * PUYO_SIZE;
+    let subPosX = axisPosX;
+    let subPosY = axisPosY + PUYO_SIZE;
+    context.fillStyle = "red";
+    context.fillRect(subPosX, subPosY, PUYO_SIZE, PUYO_SIZE);
+    context.fillRect(axisPosX, axisPosY, PUYO_SIZE, PUYO_SIZE);
   }
 
   drawField() {
@@ -96,18 +87,17 @@ class View {
   }
 }
 
-let field = new Field(6, 13, 2, Puyo);
-let view = new View(6, 13, 2, Puyo);
+class Game {
+  constructor(width, height, nextCount, puyoClass) {
+    this.field = new Field(width, height, nextCount, puyoClass);
+    this.view = new View(width, height, nextCount, puyoClass);
+    this.puyo = new Puyo(1, 1);
+  }
+}
 
-view.drawField();
-//context.fillRect(5 * 10, 10 * 11, 10, 10);
-
-
-
-
-
-
-
+let game = new Game(FIELD_WIDTH, FIELD_HEIGHT, NEXT_COUNT, Puyo);
+game.view.drawField(game.field);
+game.view.drawPuyo(game.field);
 
 
 
