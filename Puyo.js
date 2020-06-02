@@ -30,7 +30,7 @@ const LOCATE = {
   ABOVE: 1,
   LEFT: 2,
   RIGHT: 3
-}
+} 
 
 const KEY = {
   MOVE_LEFT: 65,
@@ -53,8 +53,8 @@ class Field {
     this.width = width;
     this.nextCount = nextCount;
     this.puyoClass = puyoClass;
+    this.locate = LOCATE.UNDER;
     this.initField();
-
     this.setPosition();
     this.puyo = new puyoClass(TYPE.RED, TYPE.RED, this.positionX, this.positionY);
 
@@ -82,16 +82,52 @@ class Field {
     this.state = LOCATE.UNDER;
   }
 
+  getAxisPos() {
+    let x = this.positionX;
+    let y = this.positionY;
+    return [x, y];
+  }
+
+  getSubPos() {
+    let x = this.positionX, y = this.positionY;
+    if (this.locate === LOCATE.UNDER) {
+      x = this.positionX;
+      y = this.positionY + 1;
+    }
+    if (this.locate === LOCATE.ABOVE) {
+      x = this.positionX;
+      y = this.positionY - 1;
+    }
+    if (this.locate === LOCATE.RIGHT) {
+      x = this.positionX + 1;
+      y = this.positionY;
+    }
+    if (this.locate === LOCATE.LEFT) {
+      x = this.positionX - 1;
+      y = this.positionY;
+    }
+    return [x, y];
+  }
+
+  canMove(x, y) {
+    let [axisX, axisY] = this.getAxisPos();
+    let [subX, subY ] = this.getSubPos();
+    if (this.getPuyo(axisX + x, axisY + y)) return false;
+    if (this.getPuyo(subX + x, subY + y)) return false;
+    
+    return true;
+  }
+
   moveRight() {
-    this.positionX += 1;
+    if (this.canMove(1, 0)) this.positionX += 1;
   }
 
   moveLeft() {
-    this.positionX -= 1;
+    if (this.canMove(-1, 0)) this.positionX -= 1;
   }
 
   down() {
-    this.positionY += 1;
+    if (this.canMove(0, 1)) this.positionY += 1;
   }
 
   getPuyo(x, y) {
